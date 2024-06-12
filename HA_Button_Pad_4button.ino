@@ -15,8 +15,8 @@ PubSubClient client(espClient);
 String mqttSwitch = "hapanel1/switch";
 String mqttScene = "hapanel1/scene";
 
-const char* ssid = "PKNet";
-const char* password = "HP w2207h";
+const char* ssid = "wifissidhere";
+const char* password = "wifipasswordhere";
 
 const char* mqttuser = "mqtt";
 const char* mqttpw = "12345678";
