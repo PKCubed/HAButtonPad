@@ -15,11 +15,13 @@ PubSubClient client(espClient);
 String mqttSwitch = "hapanel1/switch";
 String mqttScene = "hapanel1/scene";
 
-const char* ssid = "wifissidhere";
-const char* password = "wifipasswordhere";
+const char* ssid = "PKNet";
+const char* password = "HP w2207h";
 
 const char* mqttuser = "mqtt";
 const char* mqttpw = "12345678";
+
+const char* mqttdevicename = "HAButtonPanel0";
 
 int bank = 0;
 int lastBank = 0;
@@ -90,7 +92,7 @@ void mqttconnect() {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
 
-    if (client.connect("HAButtonPanel1", mqttuser, mqttpw)) {
+    if (client.connect(mqttdevicename, mqttuser, mqttpw)) {
       Serial.println("connected");
       lcd.clear();
       lcd.print("MQTT Connected");
@@ -139,7 +141,7 @@ void showbank() {
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  Serial.println("HA Button Panel 1.0");
+  Serial.println("HA Button Panel");
 
   pinMode(b1, INPUT_PULLUP);
   pinMode(b2, INPUT_PULLUP);
@@ -152,9 +154,9 @@ void setup() {
   analogWrite(contrast, 130);
   lcd.begin(16, 2);
 
-  lcd.print("HA Button Panel");
+  lcd.print(mqttdevicename);
   lcd.setCursor(0,2);
-  lcd.print("v1.0");
+  lcd.print("v1.1");
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
   leds[0] = CRGB(255,255,255);
