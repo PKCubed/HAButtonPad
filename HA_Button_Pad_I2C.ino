@@ -15,13 +15,13 @@ PubSubClient client(espClient);
 String mqttSwitch = "buttonpanels/switch";
 String mqttScene = "buttonpanels/scene0";
 
-const char* ssid = "WenSDAIOT";
-const char* password = "@ppleBlade23";
+const char* ssid = "SSID";
+const char* password = "Password";
 
-const char* mqttuser = "mqtt";
-const char* mqttpw = "@ppleBlade23";
+const char* mqttuser = "Username";
+const char* mqttpw = "Password";
 
-const char* mqttdevicename = "BalconyBP";
+const char* mqttdevicename = "Device Name";
 
 int bank = 0;
 int lastBank = 0;
