@@ -8,20 +8,20 @@ CRGB leds[NUM_LEDS];
 #include <WiFi.h>
 
 #include <PubSubClient.h>
-#define mqtt_server "10.0.2.5"
+#define mqtt_server "10.0.1.3"
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-String mqttSwitch = "hapanel1/switch";
-String mqttScene = "hapanel1/scene";
+String mqttSwitch = "buttonpanels/switch";
+String mqttScene = "buttonpanels/scene0";
 
-const char* ssid = "SSID";
-const char* password = "PASSWORD";
+const char* ssid = "WenSDAIOT";
+const char* password = "@ppleBlade23";
 
 const char* mqttuser = "mqtt";
-const char* mqttpw = "12345678";
+const char* mqttpw = "@ppleBlade23";
 
-const char* mqttdevicename = "HAButtonPanel1";
+const char* mqttdevicename = "BalconyBP";
 
 int bank = 0;
 int lastBank = 0;
@@ -37,6 +37,17 @@ const char* bankNames[8] = {
   "Scenes B      "  // Radio Buttons
   };
 
+const char* sceneNames[8] = {
+  "All Bright    ",
+  "All Dim       ",
+  "Pulpit        ",
+  "Piano         ",
+  "Children Story",
+  "Center        ",
+  "Not Assigned  ", // Radio Buttons
+  "All Off       "  // Radio Buttons
+  };
+
 // Pins
 const int b1 = 4, b2 = 2, b3 =15, b4 = 5, b5 = 17, b6 = 32; // Buttons
 
@@ -48,6 +59,7 @@ int buttonStates[] = {0,0,0,0,0,0};
 int buttonLastStates[] = {0,0,0,0,0,0};
 int buttonTimes[] = {0,0,0,0,0,0};
 const int debounceTime = 100; // ms
+int infoTime = 0;
 
 /*
 char charconcat(char char1, char char2) {
@@ -81,7 +93,7 @@ void mqttconnect() {
       Serial.println("Restarting...");
       lcd.clear();
       lcd.print("Failed connection");
-      lcd.setCursor(0,2);
+      lcd.setCursor(0,1);
       lcd.print("Restarting...");
       delay(1500);
       
@@ -98,7 +110,7 @@ void mqttconnect() {
     } else {
       lcd.clear();
       lcd.print("Failed connection");
-      lcd.setCursor(0,2);
+      lcd.setCursor(0,1);
       lcd.print("Try again in 2s");
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -109,7 +121,7 @@ void mqttconnect() {
   for (int i=0;i<=24;i++) {
     client.subscribe((mqttSwitch + String(i)).c_str());
   }
-  client.subscribe((mqttScene + String(0)).c_str());
+  client.subscribe(mqttScene.c_str());
   showbank();
   lastBank = bank;
 }
@@ -127,6 +139,9 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
   } if (String(topic).startsWith(mqttScene)) {
     Serial.println("Scene received");
     scenes[0] = (char)payload[0] - '0';
+    lcd.setCursor(0,1);
+    lcd.print(sceneNames[scenes[0]]);
+    infoTime = millis();
   }
 }
 
@@ -153,7 +168,7 @@ void setup() {
   lcd.backlight();
 
   lcd.print(mqttdevicename);
-  lcd.setCursor(0,2);
+  lcd.setCursor(0,1);
   lcd.print("v1.1");
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
@@ -188,7 +203,7 @@ void setup() {
 
   lcd.clear();
   lcd.print("Connecting WiFi");
-  lcd.setCursor(0,2);
+  lcd.setCursor(0,1);
   lcd.print("SSID: ");
   lcd.print(ssid);
 
@@ -202,7 +217,7 @@ void setup() {
 
   lcd.clear();
   lcd.print("Connect Success");
-  lcd.setCursor(0,2);
+  lcd.setCursor(0,1);
   lcd.print(WiFi.localIP());
 
   delay(1000);
@@ -224,6 +239,11 @@ void setup() {
 }
 
 void loop() {
+  if (infoTime + 2000 < millis()) {
+    lcd.setCursor(0,1);
+    lcd.print("                ");
+  }
+
   if (!client.connected()) {
     mqttconnect();
   }
@@ -353,8 +373,11 @@ void loop() {
       }
     } else  {
       scenes[0] = (bank-6)*4;
-      client.publish(("hapanel1/scene0"), String(scenes[0]).c_str(), true);
+      client.publish(mqttScene.c_str(), String(scenes[0]).c_str(), true);
       Serial.print(scenes[0]);
+      lcd.setCursor(0,1);
+      lcd.print(sceneNames[scenes[0]]);
+      infoTime = millis();
     }
   } if (!buttonStates[0] && buttonLastStates[0]) { // Detect falling edge
     buttonLastStates[0] = 0;
@@ -370,8 +393,11 @@ void loop() {
       }
     } else {
       scenes[0] = (bank-6)*4+1;
-      client.publish(("hapanel1/scene0"), String(scenes[0]).c_str(), true);
+      client.publish(mqttScene.c_str(), String(scenes[0]).c_str(), true);
       Serial.print(scenes[0]);
+      lcd.setCursor(0,1);
+      lcd.print(sceneNames[scenes[0]]);
+      infoTime = millis();
     }
   } if (!buttonStates[1] && buttonLastStates[1]) { // Detect falling edge
     buttonLastStates[1] = 0;
@@ -387,8 +413,11 @@ void loop() {
       }
     } else {
       scenes[0] = (bank-6)*4+2;
-      client.publish(("hapanel1/scene0"), String(scenes[0]).c_str(), true);
+      client.publish(mqttScene.c_str(), String(scenes[0]).c_str(), true);
       Serial.print(scenes[0]);
+      lcd.setCursor(0,1);
+      lcd.print(sceneNames[scenes[0]]);
+      infoTime = millis();
     }
   } if (!buttonStates[2] && buttonLastStates[2]) { // Detect falling edge
     buttonLastStates[2] = 0;
@@ -404,8 +433,11 @@ void loop() {
       }
     } else {
       scenes[0] = (bank-6)*4+3;
-      client.publish(("hapanel1/scene0"), String(scenes[0]).c_str(), true);
+      client.publish(mqttScene.c_str(), String(scenes[0]).c_str(), true);
       Serial.print(scenes[0]);
+      lcd.setCursor(0,1);
+      lcd.print(sceneNames[scenes[0]]);
+      infoTime = millis();
     }
   } if (!buttonStates[3] && buttonLastStates[3]) { // Detect falling edge
     buttonLastStates[3] = 0;
